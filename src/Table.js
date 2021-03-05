@@ -1,7 +1,4 @@
-import React, {Component} from 'react';
-
-class Table extends Component {
-  render () {
+function Table(props) {
     return (
       <div className='mt-5'>
         <table className='table table-striped table-bordered table-hover w-75 mx-auto'>
@@ -16,12 +13,21 @@ class Table extends Component {
            </tr>
           </thead>
           <tbody className='text-white'>
-            {this.props.data}
+            {props.characters.map((character, i) => {
+              return(
+                <tr key={i}>
+                  <td>{character.name}</td>
+                  <td>{character.birth_year}</td>
+                  <td>{character.height}</td>
+                  <td>{character.mass}</td>
+                  <td>{character.homeWorld}</td>
+                  <td>{character.species}</td>
+                </tr>
+              )})}
           </tbody>
         </table>
       </div>
-    )
-  }
+    ); 
 }
 
 export default Table;
