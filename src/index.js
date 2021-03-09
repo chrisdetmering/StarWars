@@ -1,5 +1,5 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import StarWarsPage from './StarWarsPage.js';
+import App from './App.js';
 
-ReactDOM.render(  <StarWarsPage />, document.getElementById('root'));
+ReactDOM.render(  <App />, document.getElementById('root'));

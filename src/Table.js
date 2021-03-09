@@ -1,4 +1,7 @@
-function Table(props) {
+import React from 'react';
+
+const Table = (props) => {
+  const characters = props.characters;
     return (
       <div className='mt-5'>
         <table className='table table-striped table-bordered table-hover w-75 mx-auto'>
@@ -13,21 +16,23 @@ function Table(props) {
            </tr>
           </thead>
           <tbody className='text-white'>
-            {props.characters.map((character, i) => {
-              return(
-                <tr key={i}>
-                  <td>{character.name}</td>
-                  <td>{character.birth_year}</td>
-                  <td>{character.height}</td>
-                  <td>{character.mass}</td>
-                  <td>{character.homeWorld}</td>
-                  <td>{character.species}</td>
-                </tr>
-              )})}
+            {characters.map(character => {
+              return (
+                <tr key={character.id}>
+                <td>{character.name}</td>
+                <td>{character.birth_year}</td>
+                <td>{character.height}</td>
+                <td>{character.mass}</td>
+                <td>{character.homeworld}</td>
+                <td>{character.species}</td>
+              </tr>
+              )
+            })}
           </tbody>
         </table>
       </div>
-    ); 
-}
+    )
+  }
+
 
 export default Table;
