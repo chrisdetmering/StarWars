@@ -1,28 +1,34 @@
-function createPageButtons(pageCount, click) { 
-  const buttons = []; 
+import React from 'react';
 
-  for (let i = 1; i <= pageCount; i++) { 
-    buttons.push(
-      <button 
-        key={i}
-        onClick={click} 
-        id={i} 
-        className='btn btn-warning text-white mx-1'>{i}</button>
-    )
+const PagesButtons = (props) => {
+  const {count} = props; 
+
+  function createButtons() {
+    const buttons = []; 
+    const totalButtons = Math.ceil(count / 10); 
+    for (let pageNum = 1; pageNum <= totalButtons; pageNum++) { 
+      buttons.push(
+        <button 
+          onClick={props.click} 
+          key={pageNum}
+          value={pageNum} 
+          className='btn btn-warning text-white mx-1'>
+          {pageNum}
+        </button>
+      )
+    }
+
+
+    return buttons; 
   }
 
-  return buttons; 
-}
 
-
-function PageButtons({click, count}) {
-   const pageCount = Math.ceil(count / 10); 
   return (
     <div className='d-flex justify-content-center m-3'>
-    {createPageButtons(pageCount, click)}
+      {createButtons()}
     </div>
-  );
+    )
 }
 
 
-export default PageButtons;
+export default PagesButtons;

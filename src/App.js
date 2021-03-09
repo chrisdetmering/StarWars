@@ -2,154 +2,76 @@ import React, {Component} from 'react';
 import Input from './Input.js';
 import Table from './Table.js';
 import axios from 'axios';
-import ButtonPageChange from './ButtonPageChange.js';
+import PageButtons from './PageButtons.js';
 
 
 
 class App extends Component {
   constructor (props) {
     super(props);
-
     this.state = {
      input : '',
      characters: [],
-     isLoaded: false
+     isLoaded: false, 
+     count: 0, 
     }
 
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.sendSearchRequest = this.sendSearchRequest.bind(this);
-    this.changePageCount = this.changePageCount.bind(this);
-    this.showPage = this.showPage.bind(this);
-    this.searchCharacter = this.searchCharacter.bind(this);
-    this.resetInputValue = this.resetInputValue.bind(this);
-    
+    this.searchCharacters = this.searchCharacters.bind(this);
+    this.handlePageChange = this.handlePageChange.bind(this); 
   }
 
-  
-  
   componentDidMount () {
-    this.showPage(1)
+    this.getCharacters('https://swapi.dev/api/people'); 
   } 
 
-  showPage(value) {
-    try {
-     const url = `https://swapi.dev/api/people/?page=${value}`
-      ;(async () => {
-      const page = await axios.get(url).then(res => res.data.results)
+  async getCharacters(url) { 
+    const response = await axios.get(url); 
+    const {count} = response.data; 
+    const characters = await Promise.all(response.data.results.map(async character => { 
+      character.homeWorld = await this.getHomeWorld(character.homeworld); 
+      character.species = await this.getSpecies(character.species); 
+      return character; 
+    })); 
 
-       for(const character of page){
-         const homeworldURL = character.homeworld
-         const newHomeworldURL = homeworldURL.replace("http", "https")
-         const homeworldRes = await axios.get(newHomeworldURL).then(res => res.data.name)
-         character.homeworld = [homeworldRes]
-         if(character.species.length !== 0){
-          const speciesURL = character.species;
-          const speciesURLstring = speciesURL.toString()
-          const newSpeciesURL = speciesURLstring.replace("http", "https")
-          const speciesRes = await axios.get(newSpeciesURL).then(res => res.data.name)
-          character.species = [speciesRes]
-         }else{
-           character.species = 'Human'
-         }
-       }
-       this.setState({characters: [...page],
-                      isLoaded: true})
-      })() 
-    } catch (err) {
-    console.error(err);
-    }
+    this.setState({ 
+      characters, 
+      count, 
+      isLoaded: true }); 
   }
 
+  async getHomeWorld(url) { 
+    const response = await axios.get(url.replace("http", "https"));
+    return response.data.name; 
+  }
 
+  async getSpecies(url) { 
+    if (url.length === 0) { 
+      return "Human"; 
+    } 
 
+    const response = await axios.get(url[0].replace("http", "https")); 
+    return response.data.name; 
+  }
+ 
   handleInputChange (e) {
     e.preventDefault();
     this.setState({input: e.target.value}) 
   }
-
-
-  searchCharacter (e) {
+  
+  searchCharacters(e) {
     e.preventDefault();
-    if(this.state.input === ''){
-      this.showPage(1)
-    }else{
-      if(this.state.isLoaded){
-        this.setState({isLoaded: false,
-                       newCharacters: [],
-                      characters: []})
-      }
-      this.sendSearchRequest()  
+    this.getCharacters(`https://swapi.dev/api/people/?search=${this.state.input}`); 
+  }
+
+  handlePageChange(e) { 
+    const pageNumber = e.target.value; 
+    if (this.state.input === '') { 
+      this.getCharacters(`https://swapi.dev/api/people/?page=${pageNumber}`); 
+    } else { 
+      this.getCharacters(`https://swapi.dev/api/people/?search=${this.state.input}&page=${pageNumber}`); 
     }
   }
-
-
-
-
- sendSearchRequest = 
-  async () => {
-      try{
-        const page1 = await axios.get('https://swapi.dev/api/people/?page=1').then(res => res.data.results)
-        const page2 = await axios.get('https://swapi.dev/api/people/?page=2').then(res => res.data.results)
-        const page3 = await axios.get('https://swapi.dev/api/people/?page=3').then(res => res.data.results)
-        const page4 = await axios.get('https://swapi.dev/api/people/?page=4').then(res => res.data.results)
-        const page5 = await axios.get('https://swapi.dev/api/people/?page=5').then(res => res.data.results)
-        const page6 = await axios.get('https://swapi.dev/api/people/?page=6').then(res => res.data.results)
-        const page7 = await axios.get('https://swapi.dev/api/people/?page=7').then(res => res.data.results)
-        const page8 = await axios.get('https://swapi.dev/api/people/?page=8').then(res => res.data.results)
-        const page9 = await axios.get('https://swapi.dev/api/people/?page=9').then(res => res.data.results)
-        
-    
-        const pages = page1.concat(page2, page3, page4, page5, page6, page7, page8, page9)
-  
-  
-        for(const character of pages) {
-          const homeworldURL = character.homeworld
-          const newHomeworldURL = homeworldURL.replace("http", "https")
-          const homeworldRes = await axios.get(newHomeworldURL).then(res => res.data.name)
-          character.homeworld = [homeworldRes]
-          if(character.species.length !== 0){
-            const speciesURL = character.species;
-            const speciesURLstring = speciesURL.toString()
-            const newSpeciesURL = speciesURLstring.replace("http", "https")
-            const speciesRes = await axios.get(newSpeciesURL).then(res => res.data.name)
-            character.species = [speciesRes]
-          }else{
-            character.species = 'Human'
-          }
-           
-          if(character.name.toLowerCase().startsWith((this.state.input).toLowerCase()) == true && this.state.input !== ''){
-           
-          let characters = this.state.characters;
-          characters.push(character);
-          this.setState({characters: [...characters]})
-        }
-      }   
-        this.setState({isLoaded: true})
-      }catch(err) {
-        console.error(err)
-      }
- }
-
-
-
-
-  changePageCount(e) {
-    e.preventDefault();
-    if(this.state.isLoaded){
-      this.setState({isLoaded: false})
-    }
-    this.showPage(e.target.value)
-  }
-
-
-
-
-  resetInputValue (e) {
-   e.preventDefault();
-   e.target.value = ''
-  }
-
-
 
 
   render () {
@@ -161,7 +83,7 @@ class App extends Component {
           <form className='form'>
            <Input searchInput={this.state.input} handleInputChange={this.handleInputChange} resetInputValue={this.resetInputValue}/>
            <div className='d-flex justify-content-center m-3'>
-             <button onClick={this.searchCharacter} className='btn btn-warning text-white'>Search</button>
+             <button onClick={this.searchCharacters} className='btn btn-warning text-white'>Search</button>
             </div>
           </form>
         </div>
@@ -170,7 +92,9 @@ class App extends Component {
         /> : <div className='d-flex justify-content-center m-5'>Loading...</div>} 
        </div>
        <div>
-         <ButtonPageChange changePageCount={this.changePageCount} />
+         <PageButtons 
+          count={this.state.count}
+          click={this.handlePageChange} />
        </div>
       </div>
     )
